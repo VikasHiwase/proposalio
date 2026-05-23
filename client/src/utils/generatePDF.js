@@ -216,6 +216,19 @@ export function downloadProposalAsPDF({ proposal, clientName, yourName }) {
     // REGULAR TEXT
     // ─────────────────────────────────────────────────────
     else {
+      // Check if line is a heading (ends with colon)
+      const isHeading = /:\s*$/.test(line);
+
+      if (isHeading) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(17, 24, 39);
+      } else {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(55, 65, 81);
+      }
+
       const textLines = doc.splitTextToSize(sanitizeText(line), contentWidth);
 
       textLines.forEach((textLine) => {
@@ -228,7 +241,8 @@ export function downloadProposalAsPDF({ proposal, clientName, yourName }) {
         y += 5.5;
       });
 
-      y += 1; // Space between paragraphs
+      // Add extra space after headings
+      y += isHeading ? 3 : 1;
     }
 
     lineIndex++;

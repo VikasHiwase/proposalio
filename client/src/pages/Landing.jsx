@@ -1,76 +1,104 @@
 export default function Landing({ onGetStarted }) {
+
+  const tools = [
+    {
+      id: "proposal",
+      icon: "📄",
+      title: "Proposal Generator",
+      description: "Win clients with professional proposals in 10 seconds",
+      badge: "Most used",
+    },
+    {
+      id: "enquiry",
+      icon: "📬",
+      title: "Enquiry Responder",
+      description: "Reply to client enquiries professionally — never miss a lead",
+      badge: "New",
+    },
+    {
+      id: "tender",
+      icon: "🏗️",
+      title: "Tender / RFP Filler",
+      description: "Fill tender requirements and RFP responses in minutes",
+      badge: "New",
+    },
+  ];
+
   return (
-    <>
-      <nav className="landing-nav">
-        <span className="brand">
-          ProposalIO
-        </span>
-        <span className="tagline">
-          Free for Indian freelancers
-        </span>
+    <div style={{ fontFamily: "sans-serif" }}>
+
+      {/* Nav */}
+      <nav style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "14px 24px", borderBottom: "1px solid #f0f0f0",
+        background: "#fff", position: "sticky", top: 0, zIndex: 10,
+      }}>
+        <span style={{ fontSize: 16, fontWeight: 700, color: "#2563eb" }}>ProposalIO</span>
+        <span style={{ fontSize: 12, color: "#aaa" }}>Free for Indian freelancers</span>
       </nav>
-      <div className="landing-container">
 
-        {/* Header */}
-        <div className="landing-header">
-          <span className="label">
-            Free tool for Indian freelancers
-          </span>
-          <h1>
-            Win more clients with<br />
-            <span className="highlight">AI-written proposals</span>
+      <div style={{ maxWidth: 660, margin: "0 auto", padding: "3rem 1.5rem" }}>
+
+        {/* Hero */}
+        <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
+          <h1 style={{ fontSize: 32, fontWeight: 700, lineHeight: 1.25, margin: "0 0 14px", color: "#787a83" }}>
+            Every business document<br />
+            <span style={{ color: "#2563eb" }}>your agency needs — in seconds</span>
           </h1>
-          <p>
-            Fill in 5 fields. Get a professional, personalised proposal in 10 seconds.
-            No templates. No generic copy. Just proposals that sound like you — on a good day.
+          <p style={{ fontSize: 16, color: "#555", lineHeight: 1.7, margin: 0 }}>
+            Proposals, enquiry replies, tender fillers — all AI-generated,
+            professionally formatted, ready to send.
           </p>
         </div>
 
-        {/* Social proof */}
-        <div className="social-proof">
-          Built for designers, developers, marketers, and consultants
-          who are tired of staring at a blank page before sending a quote.
-        </div>
-
-        {/* How it works */}
-        <div className="how-it-works">
-          <p className="section-label">
-            How it works
-          </p>
-          {[
-            ["1", "Enter your client's name and project details"],
-            ["2", "Add your timeline and price"],
-            ["3", "Get a full proposal — ready to copy and send"],
-          ].map(([num, text]) => (
-            <div key={num} className="step">
-              <div className="step-number">
-                {num}
+        {/* Tool cards */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: "2.5rem" }}>
+          {tools.map((tool) => (
+            <div
+              key={tool.id}
+              onClick={() => onGetStarted(tool.id)}
+              style={{
+                background: "#fff", border: "1px solid #e5e5e5",
+                borderRadius: 12, padding: "1.25rem 1.5rem",
+                cursor: "pointer", display: "flex",
+                alignItems: "center", gap: 16,
+                transition: "border-color 0.15s, box-shadow 0.15s",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "#2563eb";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.08)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = "#e5e5e5";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <span style={{ fontSize: 28 }}>{tool.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: "#111" }}>{tool.title}</span>
+                  {tool.badge && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 600, padding: "2px 8px",
+                      borderRadius: 20, background: tool.badge === "Most used" ? "#eff6ff" : "#f0fdf4",
+                      color: tool.badge === "Most used" ? "#2563eb" : "#16a34a",
+                      textTransform: "uppercase", letterSpacing: "0.05em",
+                    }}>
+                      {tool.badge}
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 13, color: "#666", margin: 0 }}>{tool.description}</p>
               </div>
-              <p>{text}</p>
+              <span style={{ color: "#bbb", fontSize: 18 }}>→</span>
             </div>
           ))}
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={onGetStarted}
-          className="cta-button"
-        >
-          Generate my proposal — it's free
-        </button>
-
-        <p className="landing-disclaimer">
-          No signup required. No credit card. Just your next winning proposal.
+        <p style={{ textAlign: "center", fontSize: 13, color: "#aaa" }}>
+          No signup required · No credit card · Powered by Claude AI
         </p>
       </div>
-      <div className="landing-footer">
-        <span className="footer-text">
-          © 2026 ProposalIO — Built by a freelancer, for freelancers
-        </span>
-        <span className="footer-text">
-          Powered by Claude AI
-        </span>
-      </div>
-    </>
+    </div>
   );
 }

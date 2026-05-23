@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { downloadProposalAsPDF } from "../utils/generatePDF";
 
 const initialForm = {
@@ -50,22 +50,72 @@ const fields = [
   },
 ];
 
-export default function Generator({ onBack }) {
+const toolConfig = {
+  proposal: {
+    title: "Proposal Generator",
+    endpoint: "/api/generate-proposal",
+    fields: [
+      { name: "yourName", label: "Your Name", placeholder: "e.g. Amit Sharma", hint: "Appears in signature" },
+      { name: "clientName", label: "Client Name", placeholder: "e.g. Priya Mehta", hint: "Who you're pitching to", required: true },
+      { name: "projectType", label: "Project Type", placeholder: "e.g. E-commerce website", hint: "What they want built", required: true },
+      { name: "deliverables", label: "What You Will Deliver", placeholder: "e.g. 5-page site, payment integration", hint: "Everything included", required: true, multiline: true },
+      { name: "timeline", label: "Timeline", placeholder: "e.g. 3 weeks", hint: "Realistic delivery time", required: true },
+      { name: "price", label: "Your Price", placeholder: "e.g. ₹45,000", hint: "State it confidently", required: true },
+    ],
+  },
+  enquiry: {
+    title: "Enquiry Responder",
+    endpoint: "/api/respond-enquiry",
+    fields: [
+      { name: "yourName", label: "Your Name", placeholder: "e.g. Amit Sharma", hint: "Appears in signature" },
+      { name: "businessName", label: "Your Business Name", placeholder: "e.g. Amit Design Studio", hint: "Your agency or freelance name" },
+      { name: "enquiryText", label: "The Enquiry You Received", placeholder: "Paste the client's enquiry message here...", hint: "Copy paste exactly what they sent you", required: true, multiline: true },
+      { name: "yourServices", label: "Your Services", placeholder: "e.g. Web design, mobile apps, branding", hint: "What you offer", required: true },
+      { name: "tone", label: "Tone", placeholder: "e.g. Warm and professional", hint: "How should it sound?" },
+    ],
+  },
+  tender: {
+    title: "Tender / RFP Filler",
+    endpoint: "/api/fill-tender",
+    fields: [
+      { name: "yourName", label: "Your Name", placeholder: "e.g. Amit Sharma", hint: "Signatory name" },
+      { name: "companyName", label: "Your Company Name", placeholder: "e.g. Amit Tech Solutions Pvt Ltd", hint: "Legal or business name" },
+      { name: "tenderRequirement", label: "Tender / RFP Requirement", placeholder: "Paste the tender requirements or describe what they're asking for...", hint: "The more detail you give, the better the response", required: true, multiline: true },
+      { name: "ourExperience", label: "Your Relevant Experience", placeholder: "e.g. 5 years in web development, built 50+ projects, worked with HDFC, Zomato...", hint: "Highlight what makes you qualified", required: true, multiline: true },
+      { name: "teamSize", label: "Team Size", placeholder: "e.g. 8-person team", hint: "Optional but adds credibility" },
+    ],
+  },
+};
+
+export default function Generator({ toolId = "proposal", onBack }) {
+  const config = toolConfig[toolId];
+
+  // Build initial form state dynamically from config fields
+  const initialForm = Object.fromEntries(config.fields.map((f) => [f.name, ""]));
+
   const [form, setForm] = useState(initialForm);
   const [proposal, setProposal] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [done, setDone] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [done, setDone] = useState(false);
+
+  // Reset form when tool changes
+  useEffect(() => {
+    setForm(Object.fromEntries(config.fields.map((f) => [f.name, ""])));
+    setProposal("");
+    setDone(false);
+    setError(null);
+  }, [toolId]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  const isFormValid = fields
-    .filter((f) => f.name !== "yourName")
-    .every((f) => form[f.name].trim().length > 0);
+  const isFormValid = config.fields
+    .filter((f) => f.required)
+    .every((f) => form[f.name]?.trim().length > 0);
 
   async function handleGenerate() {
     setLoading(true);
@@ -74,7 +124,8 @@ export default function Generator({ onBack }) {
     setDone(false);
 
     try {
-      const response = await fetch("http://localhost:3001/api/generate-proposal", {
+      const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const response = await fetch(`${BASE_URL}${config.endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -120,7 +171,7 @@ export default function Generator({ onBack }) {
   function handleDownload() {
     downloadProposalAsPDF({
       proposal,
-      clientName: form.clientName,
+      clientName: form.clientName || form.companyName || "Client",
       yourName: form.yourName,
     });
     setDownloaded(true);
@@ -139,7 +190,7 @@ export default function Generator({ onBack }) {
 
       {/* Form */}
       <div className="form-container">
-        {fields.map((f) => (
+        {config.fields.map((f) => (
           <div key={f.name} className="form-group">
             <label>
               {f.label}
@@ -190,7 +241,9 @@ export default function Generator({ onBack }) {
           <div className="form-container" style={{ marginTop: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
               <div>
-                <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 4px" }}>Your Proposal</h2>
+                <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: "#111" }}>
+                  {config.title}
+                </h1>
                 {loading && (
                   <p style={{ fontSize: 12, color: "var(--text-muted)", margin: 0 }}>
                     Claude is writing...
